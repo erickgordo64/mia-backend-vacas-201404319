@@ -1351,6 +1351,34 @@ router.post('/addDetalleChat', async (req, res) => {
     console.log("registro ingresado mensaje")
 });
 
+router.get('/getChatById/', async (req, res) => {
+
+    var id=req.query.id;
+
+    console.log(id);
+
+    sql = "select idchat, chat.nombre, idadmin,idhijo, nickname, idpadre from mensaje inner join chat using(idchat) inner join usuario_hijo using(idhijo) where idpadre=:id group by idchat, chat.nombre, idadmin,idhijo, nickname, idpadre";
+
+    let result = await BD.Open(sql, [id], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idchat": user[0],
+            "nombre": user[1],
+            "idadmin": user[2],
+            "idhijo": user[3],
+            "nickname": user[4],
+            "idpadre": user[5]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("enviando chat");
+});
+
 // esto es del final
 
 router.post('/crearProducto', async (req, res) => {
