@@ -1334,6 +1334,23 @@ router.get('/getChats/', async (req, res) => {
     console.log("retornando chat by nombre");
 });
 
+router.post('/addDetalleChat', async (req, res) => {
+
+    const { idchat, contenido, idadmin, idhijo } = req.body;
+
+    console.log(idchat, contenido, idadmin, idhijo);
+
+    sql = "insert into mensaje(idchat, contenido, idadmin, idhijo) values (:idchat, :contenido, :idadmin, :idhijo)";
+
+    await BD.Open(sql, [idchat, contenido, idadmin, idhijo], true);
+
+    res.status(200).json({
+        "nombre": contenido
+    })
+
+    console.log("registro ingresado mensaje")
+});
+
 // esto es del final
 
 router.post('/crearProducto', async (req, res) => {
