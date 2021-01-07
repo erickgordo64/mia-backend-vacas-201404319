@@ -919,7 +919,7 @@ router.get('/getReporte1', async (req, res) => {
 
 router.get('/getReporte2', async (req, res) => {
 
-    sql = "select count(idhijo) \"top\", departamento, idhijo from carta_santa inner join usuario_hijo using(idhijo) group by idhijo, departamento order by \"top\" desc FETCH NEXT 10 ROWS ONLY";
+    sql = "select count(idhijo) \"top\", departamento from carta_santa inner join usuario_hijo using(idhijo) group by departamento order by \"top\" desc FETCH NEXT 10 ROWS ONLY";
 
     let result = await BD.Open(sql, [], false);
 
@@ -940,7 +940,7 @@ router.get('/getReporte2', async (req, res) => {
 
 router.get('/getReporte3', async (req, res) => {
 
-    sql = "select count(idhijo) \"top\", municipio, idhijo from carta_santa inner join usuario_hijo using(idhijo) group by idhijo, municipio order by \"top\" desc FETCH NEXT 10 ROWS ONLY";
+    sql = "select count(idhijo) \"top\", municipio from carta_santa inner join usuario_hijo using(idhijo) group by municipio order by \"top\" desc FETCH NEXT 10 ROWS ONLY";
 
     let result = await BD.Open(sql, [], false);
 
@@ -1296,6 +1296,44 @@ router.post('/addReparto', async (req, res) => {
 
     console.log("registro ingresado reparto")
 });
+
+router.post('/addChat', async (req, res) => {
+
+    const { nombre } = req.body;
+
+    sql = "insert into chat(nombre) values (:nombre)";
+
+    await BD.Open(sql, [nombre], true);
+
+    res.status(200).json({
+        "nombre": nombre
+    })
+
+    console.log("registro ingresado chat")
+});
+
+router.get('/getChats/', async (req, res) => {
+
+    var nickname=req.query.nickname;
+
+    sql = "select * from chat where nombre=:nickname";
+
+    let result = await BD.Open(sql, [nickname], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idchat": user[0],
+            "nombre": user[1]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("retornando chat by nombre");
+});
+
 // esto es del final
 
 router.post('/crearProducto', async (req, res) => {
