@@ -1039,6 +1039,263 @@ router.get('/getReporte7', async (req, res) => {
     res.json(Users);
     console.log("enviando reporte1");
 });
+//********************************* */ seccion papa*************************************************************************************
+//************************************************************************************************************************************* */
+
+router.post('/loginPapa', async (req, res) => {
+    const { correo, contrasena } = req.body;
+
+    sql = "select * from usuario_padre where correo=:correo ";
+
+    console.log(correo, contrasena);
+
+    let result = await BD.Open(sql, [correo], false);
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idpadre": user[0],
+            "nombre_padre": user[1],
+            "correo": user[2],
+            "contrasena": user[3],
+            "telefono": user[4],
+            "saldo":user[5]
+        }
+        Users.push(userSchema);
+    })
+
+    let respv = { "auth": "true" }
+    let respf = { "auth": "false" }
+
+    if (Users.length === 0) {
+        res.status(400).json(respf);
+    } else {
+        if (Users.correo = correo) {
+            console.log("correo correcto");
+            if (Users.contrasena = contrasena) {
+                console.log("contrasena correca", Users.contrasena)
+            } else {
+                console.log("contrasena incorrecta")
+            }
+        } else {
+            console.log("correo malo")
+        }
+        res.status(200).json(Users);
+    }
+
+});
+
+router.get('/getHijoById/', async (req, res) => {
+
+    var id=req.query.id;
+
+    console.log(id);
+
+    sql = "SELECT * FROM usuario_hijo where idpadre=:id";
+
+    let result = await BD.Open(sql, [id], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idhijo": user[0],
+            "nickname": user[1],
+            "contrasena": user[2],
+            "nombre": user[3],
+            "sexo": user[4],
+            "fecha_nacimiento": user[5],
+            "edad": user[6],
+            "bastones": user[7],
+            "departamento": user[8],
+            "municipio": user[9],
+            "direccion": user[10],
+            "longitud": user[11],
+            "latitud": user[12],
+            "idpadre": user[13],
+
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("enviando hijos padre");
+});
+
+router.get('/getAccionById/', async (req, res) => {
+
+    var ed = req.query.id;
+
+    console.log(ed);
+
+    sql = "select idhijo, nickname, basyt, idaccion, titulo, descripcion, recompensa, iddetalle_accion from usuario_hijo inner join detalle_accion using(idhijo) inner join buena_accion using(idaccion) where idhijo=:ed and estado_accion='false'";
+
+    let result = await BD.Open(sql, [ed], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idhijo": user[0],
+            "nickname": user[1],
+            "bastones": user[2],
+            "idaccion": user[3],
+            "titulo": user[4],
+            "descripcion": user[5],
+            "recompensa": user[6],
+            "iddetalle_accion": user[7]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("devolviendo acciones por hijo")
+});
+
+
+router.put('/updateDetalleAccion', async (req, res) => {
+
+    const {id, estado}=req.body;
+    
+    console.log(id, estado);
+
+    sql = "update detalle_accion set estado_accion=:estado where iddetalle_accion=:id";
+
+    await BD.Open(sql, [estado, id], true);
+
+    Users = [];
+
+    let respv = { "auth": "true" }
+    
+    res.status(200).json(respv);    
+    console.log("actualizado estado accion");
+});
+
+router.put('/updateBastonesHijo', async (req, res) => {
+
+    const {id, bastones}=req.body;
+    
+    console.log(id, bastones);
+
+    sql = "update usuario_hijo set basyt=:bastones where idhijo=:id";
+
+    await BD.Open(sql, [bastones, id], true);
+
+    Users = [];
+
+    let respv = { "auth": "true" }
+    
+    res.status(200).json(respv);    
+    console.log("actualizado bastones hijo");
+});
+
+
+router.get('/getCartasHijosById/', async (req, res) => {
+
+    var ed = req.query.id;
+
+    console.log(ed);
+
+    sql = "select idhijo, nickname, nombre, idcarta, fecha_carta, estado_carta from usuario_hijo inner join carta_santa using(idhijo) where idpadre=:ed order by idhijo desc";
+
+    let result = await BD.Open(sql, [ed], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idhijo": user[0],
+            "nickname": user[1],
+            "nombre": user[2],
+            "idcarta": user[3],
+            "fecha_carta": user[4],
+            "estado_carta": user[5]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("devolviendo cartas de hijos")
+});
+
+router.get('/getElementosCartaById/', async (req, res) => {
+
+    var ed = req.query.id;
+
+    console.log(ed);
+
+    sql = "select idcarta, estado_carta, iddetallecarta, idproducto, nombre_producto, precio from detalle_carta inner join carta_santa using(idcarta) inner join producto using(idproducto) where idcarta=:ed";
+
+    let result = await BD.Open(sql, [ed], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idcarta": user[0],
+            "estado_carta": user[1],
+            "iddetallecarta": user[2],
+            "idproducto": user[3],
+            "nombre_producto": user[4],
+            "precio": user[5]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("devolviendo elementos cartas de hijos")
+});
+
+router.put('/updateEstadoCarta', async (req, res) => {
+
+    const {id, estado}=req.body;
+    
+    console.log(id, estado);
+
+    sql = "update carta_santa set estado_carta=:estado where idcarta=:id";
+
+    await BD.Open(sql, [estado, id], true);
+
+    Users = [];
+
+    let respv = { "auth": "true" }
+    
+    res.status(200).json(respv);    
+    console.log("actualizado estado carta");
+});
+
+router.delete('/deleteProductoDetalleCarta/',async(req,res)=>{
+    var id=req.query.id;
+
+    console.log(id);
+
+    sql="delete from detalle_carta where iddetallecarta=:id";
+
+    await BD.Open(sql, [id], true);
+
+    Users = [];
+
+    let respv = { "auth": "true" }
+    
+    res.status(200).json(respv);    
+    console.log("producto quitado del detalle carta");
+
+});
+
+router.post('/addReparto', async (req, res) => {
+
+    const { idhijo, idsanta, idcarta, estado} = req.body;
+
+    sql = "insert into reparto(idhijo, idsanta, idcarta, estado) values (:idhijo, :idsanta, :idcarta, :estado)";
+
+    await BD.Open(sql, [idhijo, idsanta,idcarta, estado], true);
+
+    res.status(200).json({
+        "nombre": estado
+    })
+
+    console.log("registro ingresado reparto")
+});
 // esto es del final
 
 router.post('/crearProducto', async (req, res) => {
