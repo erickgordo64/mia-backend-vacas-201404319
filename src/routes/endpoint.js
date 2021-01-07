@@ -1379,6 +1379,92 @@ router.get('/getChatById/', async (req, res) => {
     console.log("enviando chat");
 });
 
+router.post('/loginSanta', async (req, res) => {
+    const { username, password } = req.body;
+
+    sql = "select * from santa where nick=:correo and contrasena=:password";
+
+    console.log(username, password);
+
+
+
+    let result = await BD.Open(sql, [username,  password], false);
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idsanta": user[0],
+            "nick": user[1],
+            "contrasena": user[2]
+        }
+        Users.push(userSchema);
+    })
+
+    let respv = { "auth": "true" }
+    let respf = { "auth": "false" }
+
+    if (Users.length === 0) {
+        res.status(400).json(respf);
+    } else {
+        if (Users.nick = username) {
+            console.log("correo correcto");
+            if (Users.contrasena = password) {
+                console.log("contrasena correca")
+            } else {
+                console.log("contrasena incorrecta")
+            }
+        } else {
+            console.log("correo malo")
+        }
+        res.status(200).json(Users);
+    }
+console.log("login santa");
+});
+
+router.get('/getPublicacionById/', async (req, res) => {
+
+    var id=req.query.id;
+
+    console.log(id);
+
+    sql = "select * from publicacion_santa where idsanta=:id";
+
+    let result = await BD.Open(sql, [id], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "idpublicacion": user[0],
+            "contenido": user[1],
+            "imagen": user[2],
+            "idsanta": user[3],
+            "titulo": user[4]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("enviando publiacion santa");
+});
+
+router.post('/addPublicacion', async (req, res) => {
+
+    const { titulo, contenido, imagen, idsanta } = req.body;
+
+    console.log(titulo, contenido, imagen, idsanta);
+
+    sql = "insert into publicacion_santa(contenido, imagen, idsanta, titulo) values (:contenido, :imagen, :idsanta, :titulo)";
+
+    await BD.Open(sql, [contenido, imagen, idsanta, titulo], true);
+
+    res.status(200).json({
+        "nombre": titulo
+    })
+
+    console.log("registro ingresado publicacion")
+});
+
 // esto es del final
 
 router.post('/crearProducto', async (req, res) => {
