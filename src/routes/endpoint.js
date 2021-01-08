@@ -2,8 +2,13 @@ const { Router } = require('express');
 const router = Router();
 const BD = require('../config/configdb');
 var dateTime = require('node-datetime');
+const multipart = require('connect-multiparty');
+let csvToJson = require('convert-csv-to-json');
 
 
+const multiPartMiddleware = multipart({
+    uploadDir: './subidas'
+});
 
 
 //READ
@@ -173,7 +178,7 @@ router.post('/addCarta/', async (req, res) => {
     var dt = dateTime.create();
     var formatted = dt.format('d-m-y');
     console.log(formatted);
-   
+
     sql = "insert into carta_santa(estado_carta, fecha_carta, idhijo) values (:estado, to_date(:formatted,'DD/MM/YYYY'), :idhijo)";
 
     await BD.Open(sql, [estado, formatted, idhijo], true);
@@ -424,7 +429,7 @@ router.get('/getBuenaAccion', async (req, res) => {
 
 router.get('/getBA/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     sql = "SELECT * FROM buena_accion where idaccion=:id";
 
@@ -448,8 +453,8 @@ router.get('/getBA/', async (req, res) => {
 
 router.put('/updateBA/', async (req, res) => {
 
-    var id=req.query.id;
-    const {titulo, descripcion, recompensa, edad}=req.body;
+    var id = req.query.id;
+    const { titulo, descripcion, recompensa, edad } = req.body;
 
     sql = "update buena_accion set titulo=:titulo, descripcion=:descripcion, recompensa=:recompensa, edad=:edad where idaccion=:id";
 
@@ -458,8 +463,8 @@ router.put('/updateBA/', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado");
 });
 
@@ -526,7 +531,7 @@ router.get('/getCategoria', async (req, res) => {
 
 router.get('/getProduct/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     console.log(id);
 
@@ -573,8 +578,8 @@ router.post('/addProductos', async (req, res) => {
 
 router.put('/updateProducto/', async (req, res) => {
 
-    var id=req.query.id;
-    const {nombre, precio, edad, idcat}=req.body;
+    var id = req.query.id;
+    const { nombre, precio, edad, idcat } = req.body;
 
     sql = "update producto set nombre_producto=:nombre, precio=:precio, edad=:edad, idcategoria=:idcat where idproducto=:id";
 
@@ -583,8 +588,8 @@ router.put('/updateProducto/', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado producto");
 });
 
@@ -600,7 +605,7 @@ router.get('/getSanta', async (req, res) => {
         let userSchema = {
             "idsanta": user[0],
             "nick": user[1],
-            "contrasena":user[2]
+            "contrasena": user[2]
         }
 
         Users.push(userSchema);
@@ -611,7 +616,7 @@ router.get('/getSanta', async (req, res) => {
 
 router.get('/getSant/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
     sql = "SELECT * FROM santa where idsanta=:id";
 
     let result = await BD.Open(sql, [id], false);
@@ -622,7 +627,7 @@ router.get('/getSant/', async (req, res) => {
         let userSchema = {
             "idsanta": user[0],
             "nick": user[1],
-            "contrasena":user[2]
+            "contrasena": user[2]
         }
 
         Users.push(userSchema);
@@ -657,7 +662,7 @@ router.get('/getPadre', async (req, res) => {
 
 router.get('/getPapa/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
     sql = "SELECT * FROM usuario_padre where idpadre=:id";
 
     let result = await BD.Open(sql, [id], false);
@@ -715,7 +720,7 @@ router.get('/getHijo', async (req, res) => {
 
 router.get('/getSon/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
     sql = "SELECT * FROM usuario_hijo where idhijo=:id";
 
     let result = await BD.Open(sql, [id], false);
@@ -749,14 +754,14 @@ router.get('/getSon/', async (req, res) => {
 
 router.post('/addSanta', async (req, res) => {
 
-    const { nick, contrasena} = req.body;
+    const { nick, contrasena } = req.body;
 
     sql = "insert into santa(nick, contrasena) values (:nick, :contrasena)";
 
     await BD.Open(sql, [nick, contrasena], true);
 
     res.status(200).json({
-        "nick": nick 
+        "nick": nick
     })
 
     console.log("registro ingresado santa")
@@ -779,11 +784,11 @@ router.post('/addPadre', async (req, res) => {
 
 router.post('/addHijo', async (req, res) => {
 
-    const { nickname, password, nombre,sexo,fecha,edad,bastones,departamento,municipio,direccion,longitud,latitud,idpadre } = req.body;
+    const { nickname, password, nombre, sexo, fecha, edad, bastones, departamento, municipio, direccion, longitud, latitud, idpadre } = req.body;
 
     sql = "insert into usuario_hijo(nickname, contrasena, nombre, sexo, fecha_nacimiento, edad,basyt, departamento, municipio, direccion, longitud, latitud, idpadre) values (:nickname,:password,:nombre,:sexo,to_date(:fecha,'YYYY/MM/DD'), :edad,:bastones,:departamento,:municipio,:direccion,:longitud,:latitud,:idpadre)";
 
-    await BD.Open(sql, [nickname, password, nombre,sexo,fecha,edad,bastones,departamento,municipio,direccion,longitud,latitud,idpadre], true);
+    await BD.Open(sql, [nickname, password, nombre, sexo, fecha, edad, bastones, departamento, municipio, direccion, longitud, latitud, idpadre], true);
 
     res.status(200).json({
         "nombre": nombre
@@ -794,8 +799,8 @@ router.post('/addHijo', async (req, res) => {
 
 router.put('/updateSanta/', async (req, res) => {
 
-    var id=req.query.id;
-    const {nick, contrasena}=req.body;
+    var id = req.query.id;
+    const { nick, contrasena } = req.body;
 
     sql = "update santa set nick=:nick, contrasena=:contrasena where idsanta=:id";
 
@@ -804,15 +809,15 @@ router.put('/updateSanta/', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado santa");
 });
 
 router.put('/updatePadre/', async (req, res) => {
 
-    var id=req.query.id;
-    const {nombre, email, password, telefono, saldo}=req.body;
+    var id = req.query.id;
+    const { nombre, email, password, telefono, saldo } = req.body;
 
     sql = "update usuario_padre set nombre_padre=:nombre, correo=:email, contrasena=:password, telefono=:telefno, saldo=:saldo where idpadre=:id";
 
@@ -821,31 +826,31 @@ router.put('/updatePadre/', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado padre");
 });
 
 router.put('/updateHijo/', async (req, res) => {
 
-    var id=req.query.id;
-    const {nickname, password, nombre,sexo,fecha,edad,bastones,departamento,municipio,direccion,longitud,latitud,idpadre }=req.body;
+    var id = req.query.id;
+    const { nickname, password, nombre, sexo, fecha, edad, bastones, departamento, municipio, direccion, longitud, latitud, idpadre } = req.body;
 
     sql = "update usuario_hijo set nickname=:nickname, contrasena=:password, nombre=:nombre, sexo=:sexo, fecha_nacimiento=to_date(:fecha,'YYYY/MM/DD'), edad=:edad,basyt=:bastones, departamento=:departamento, municipio=:municipio, direccion=:direccion, longitud=:longitud, latitud=:latitud, idpadre=:idpadre where idhijo=:id";
 
-    await BD.Open(sql, [nickname, password, nombre,sexo,fecha,edad,bastones,departamento,municipio,direccion,longitud,latitud,idpadre, id], true);
+    await BD.Open(sql, [nickname, password, nombre, sexo, fecha, edad, bastones, departamento, municipio, direccion, longitud, latitud, idpadre, id], true);
 
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado hijo");
 });
 
 router.get('/getChat/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     console.log(id);
 
@@ -1059,7 +1064,7 @@ router.post('/loginPapa', async (req, res) => {
             "correo": user[2],
             "contrasena": user[3],
             "telefono": user[4],
-            "saldo":user[5]
+            "saldo": user[5]
         }
         Users.push(userSchema);
     })
@@ -1087,7 +1092,7 @@ router.post('/loginPapa', async (req, res) => {
 
 router.get('/getHijoById/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     console.log(id);
 
@@ -1155,8 +1160,8 @@ router.get('/getAccionById/', async (req, res) => {
 
 router.put('/updateDetalleAccion', async (req, res) => {
 
-    const {id, estado}=req.body;
-    
+    const { id, estado } = req.body;
+
     console.log(id, estado);
 
     sql = "update detalle_accion set estado_accion=:estado where iddetalle_accion=:id";
@@ -1166,15 +1171,15 @@ router.put('/updateDetalleAccion', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado estado accion");
 });
 
 router.put('/updateBastonesHijo', async (req, res) => {
 
-    const {id, bastones}=req.body;
-    
+    const { id, bastones } = req.body;
+
     console.log(id, bastones);
 
     sql = "update usuario_hijo set basyt=:bastones where idhijo=:id";
@@ -1184,8 +1189,8 @@ router.put('/updateBastonesHijo', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado bastones hijo");
 });
 
@@ -1248,8 +1253,8 @@ router.get('/getElementosCartaById/', async (req, res) => {
 
 router.put('/updateEstadoCarta', async (req, res) => {
 
-    const {id, estado}=req.body;
-    
+    const { id, estado } = req.body;
+
     console.log(id, estado);
 
     sql = "update carta_santa set estado_carta=:estado where idcarta=:id";
@@ -1259,36 +1264,36 @@ router.put('/updateEstadoCarta', async (req, res) => {
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("actualizado estado carta");
 });
 
-router.delete('/deleteProductoDetalleCarta/',async(req,res)=>{
-    var id=req.query.id;
+router.delete('/deleteProductoDetalleCarta/', async (req, res) => {
+    var id = req.query.id;
 
     console.log(id);
 
-    sql="delete from detalle_carta where iddetallecarta=:id";
+    sql = "delete from detalle_carta where iddetallecarta=:id";
 
     await BD.Open(sql, [id], true);
 
     Users = [];
 
     let respv = { "auth": "true" }
-    
-    res.status(200).json(respv);    
+
+    res.status(200).json(respv);
     console.log("producto quitado del detalle carta");
 
 });
 
 router.post('/addReparto', async (req, res) => {
 
-    const { idhijo, idsanta, idcarta, estado} = req.body;
+    const { idhijo, idsanta, idcarta, estado } = req.body;
 
     sql = "insert into reparto(idhijo, idsanta, idcarta, estado) values (:idhijo, :idsanta, :idcarta, :estado)";
 
-    await BD.Open(sql, [idhijo, idsanta,idcarta, estado], true);
+    await BD.Open(sql, [idhijo, idsanta, idcarta, estado], true);
 
     res.status(200).json({
         "nombre": estado
@@ -1314,7 +1319,7 @@ router.post('/addChat', async (req, res) => {
 
 router.get('/getChats/', async (req, res) => {
 
-    var nickname=req.query.nickname;
+    var nickname = req.query.nickname;
 
     sql = "select * from chat where nombre=:nickname";
 
@@ -1353,7 +1358,7 @@ router.post('/addDetalleChat', async (req, res) => {
 
 router.get('/getChatById/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     console.log(id);
 
@@ -1388,7 +1393,7 @@ router.post('/loginSanta', async (req, res) => {
 
 
 
-    let result = await BD.Open(sql, [username,  password], false);
+    let result = await BD.Open(sql, [username, password], false);
     Users = [];
 
     result.rows.map(user => {
@@ -1418,12 +1423,12 @@ router.post('/loginSanta', async (req, res) => {
         }
         res.status(200).json(Users);
     }
-console.log("login santa");
+    console.log("login santa");
 });
 
 router.get('/getPublicacionById/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     console.log(id);
 
@@ -1467,7 +1472,7 @@ router.post('/addPublicacion', async (req, res) => {
 
 router.get('/getEntregasById/', async (req, res) => {
 
-    var id=req.query.id;
+    var id = req.query.id;
 
     console.log(id);
 
@@ -1493,6 +1498,35 @@ router.get('/getEntregasById/', async (req, res) => {
     })
     res.json(Users);
     console.log("enviando repartos");
+});
+
+router.post('/addArchivo', multiPartMiddleware, (req, res) => {
+
+    console.log("body ", req.body, "file ", req.files);
+    var file = req.files.upload[0];
+
+    console.log(file.path);
+
+    let fileInputName = file.path;
+    let fileOutputName = './subidas/myOutputFile.json';
+
+    csvToJson.generateJsonFileFromCsv(fileInputName, fileOutputName);
+    //csvToJson.fieldDelimiter(',').getJsonFromCsv(fileInputName);
+
+    let json = csvToJson.fieldDelimiter(',').getJsonFromCsv(fileInputName);
+    for (let i = 0; i < json.length; i++) {
+        console.log(json[i].CorreoElectronico);
+    }
+
+    // console.log(json);
+
+    // csvToJson.generateJsonFileFromCsv(json, fileOutputName);
+
+    res.status(200).json({
+        "nombre": "exito"
+    })
+
+    console.log("registro ingresado publicacion")
 });
 
 // esto es del final
