@@ -1465,6 +1465,36 @@ router.post('/addPublicacion', async (req, res) => {
     console.log("registro ingresado publicacion")
 });
 
+router.get('/getEntregasById/', async (req, res) => {
+
+    var id=req.query.id;
+
+    console.log(id);
+
+    sql = "select nickname, latitud, longitud, direccion, municipio, departamento, estado, idreparto from reparto inner join usuario_hijo using(idhijo) where idsanta=:id";
+
+    let result = await BD.Open(sql, [id], false);
+
+    Users = [];
+
+    result.rows.map(user => {
+        let userSchema = {
+            "nickname": user[0],
+            "latitud": user[1],
+            "longitud": user[2],
+            "direccion": user[3],
+            "municipio": user[4],
+            "departamento": user[5],
+            "estado": user[6],
+            "idreparto": user[7]
+        }
+
+        Users.push(userSchema);
+    })
+    res.json(Users);
+    console.log("enviando repartos");
+});
+
 // esto es del final
 
 router.post('/crearProducto', async (req, res) => {
