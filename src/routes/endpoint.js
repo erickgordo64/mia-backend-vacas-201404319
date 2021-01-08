@@ -1540,7 +1540,7 @@ router.post('/addArchivo', multiPartMiddleware, async(req, res) => {
         var nombre_producto=json[i].NombreJuguete;
         var categoria=json[i].CategoriaJuguete;
         var precio=json[i].PrecioJuguete;
-        var edad=json[i].EdadRecomendada;
+        var edad=json[i].EdadRecomendable;
 
         sql = "insert into carga(correo, contrasena, nombre_hijo, nombre_padre, nickname, municipio, departamento, direccion, latitud, longitud, telefono, fecha, nombre_producto, categoria, precio, edad) values (:correo, :contrasena, :nombre_hijo, :nombre_padre, :nickname, :municipio, :departamento, :direccion, :latitud, :longitud, :telefono, to_date(:fecha,'DD/MM/YYYY'), :nombre_producto, :categoria, :precio, :edad)";
         //sql ejecucion
@@ -1591,6 +1591,63 @@ router.post('/CargaMasiva', async (req, res) => {
     })
 
     console.log("registro ingresado publicacion")
+});
+
+router.post('/ConfirmarCarga', async (req, res) => {
+
+   console.log("intenta cargar");
+
+    sql1 = "insert into usuario_padre(nombre_padre, correo, contrasena)  (select nombre_padre, correo, contrasena  from carga group by correo, contrasena, nombre_padre)";
+
+    await BD.Open(sql1, [], true);
+
+    console.log("intenta cargar");
+
+    sql2 = "insert into usuario_hijo(nickname, contrasena, nombre, departamento, municipio, direccion, longitud, latitud, idpadre) (select nickname, carga.contrasena, nombre_hijo, departamento, municipio, direccion, longitud, latitud, idpadre from carga inner join usuario_padre using(correo) group by nickname, carga.contrasena, nombre_hijo, departamento, municipio, direccion, longitud, latitud, idpadre)";
+
+    await BD.Open(sql2, [], true);
+
+    console.log("intenta cargar");
+
+    sql3 = "insert into categoria(nombre) (select categoria from carga group by categoria)";
+
+    await BD.Open(sql3, [], true);
+
+    console.log("intenta cargar");
+
+    sql4 = "insert into producto(nombre_producto, precio, edad, idcategoria)(select nombre_producto, precio, edad, idcategoria from carga inner join categoria on carga.categoria=categoria.nombre group by nombre_producto, precio, edad, idcategoria)";
+
+    await BD.Open(sql4, [], true);
+
+    console.log("intenta cargar");
+
+    sql5 = "insert into carta_santa(fecha_carta, idhijo)(select fecha, idhijo from carga inner join usuario_hijo on usuario_hijo.nickname=carga.nickname group by fecha, idhijo)";
+
+    await BD.Open(sql5, [], true);
+
+    console.log("intenta cargar");
+
+    sql6 = "insert into detalle_carta(idproducto,idcarta) (select idproducto, idcarta from carga inner join carta_santa on carta_santa.fecha_carta=carga.fecha inner join producto on producto.nombre_producto=carga.nombre_producto)";
+
+    await BD.Open(sql6, [], true);
+
+    console.log("intenta cargar");
+
+    sql7 = "insert into reparto(idhijo, idsanta,idcarta) (select idhijo, 1,idcarta from carta_santa inner join carga on carga.fecha=carta_santa.fecha_carta group by idhijo, idcarta)";
+
+    await BD.Open(sql7, [], true);
+
+    console.log("intenta cargar");
+    
+    sql8 = "delete from carga";
+
+    await BD.Open(sql8, [], true);
+
+    res.status(200).json({
+        "nombre": "true"
+    })
+
+    console.log("super carga")
 });
 
 // esto es del final
