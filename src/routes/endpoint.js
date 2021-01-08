@@ -6,10 +6,16 @@ const multipart = require('connect-multiparty');
 let csvToJson = require('convert-csv-to-json');
 
 
-const multiPartMiddleware = multipart({
-    uploadDir: './subidas'
-});
+// const multiPartMiddleware = multipart({
+//     uploadDir: './subidas'
+// });
 
+const multiPartMiddleware = multipart();
+
+
+let json=null
+
+const Json=null;
 
 //READ
 router.get('/', async (req, res) => {
@@ -1500,7 +1506,7 @@ router.get('/getEntregasById/', async (req, res) => {
     console.log("enviando repartos");
 });
 
-router.post('/addArchivo', multiPartMiddleware, (req, res) => {
+router.post('/addArchivo', multiPartMiddleware, async(req, res) => {
 
     console.log("body ", req.body, "file ", req.files);
     var file = req.files.upload[0];
@@ -1510,17 +1516,75 @@ router.post('/addArchivo', multiPartMiddleware, (req, res) => {
     let fileInputName = file.path;
     let fileOutputName = './subidas/myOutputFile.json';
 
-    csvToJson.generateJsonFileFromCsv(fileInputName, fileOutputName);
+    // csvToJson.generateJsonFileFromCsv(fileInputName, fileOutputName);
     //csvToJson.fieldDelimiter(',').getJsonFromCsv(fileInputName);
 
-    let json = csvToJson.fieldDelimiter(',').getJsonFromCsv(fileInputName);
+    json = csvToJson.fieldDelimiter(',').getJsonFromCsv(fileInputName);
+
+    let Json=json;
+
     for (let i = 0; i < json.length; i++) {
-        console.log(json[i].CorreoElectronico);
+        // console.log(json[i].CorreoElectronico);
+        var correo=json[i].CorreoElectronico;
+        var contrasena=json[i].Password; 
+        var nombre_hijo=json[i].NombreHijo; 
+        var nombre_padre=json[i].NombrePadre; 
+        var nickname=json[i].NicknameHijo; 
+        var municipio=json[i].Municipio; 
+        var departamento=json[i].Departamento;
+        var direccion=json[i].DescripcionDireccion; 
+        var latitud=json[i].Latitud;
+        var longitud=json[i].Longitud;
+        var telefono=json[i].NumeroTelefono;
+        var fecha=json[i].FechaCarta;
+        var nombre_producto=json[i].NombreJuguete;
+        var categoria=json[i].CategoriaJuguete;
+        var precio=json[i].PrecioJuguete;
+        var edad=json[i].EdadRecomendada;
+
+        sql = "insert into carga(correo, contrasena, nombre_hijo, nombre_padre, nickname, municipio, departamento, direccion, latitud, longitud, telefono, fecha, nombre_producto, categoria, precio, edad) values (:correo, :contrasena, :nombre_hijo, :nombre_padre, :nickname, :municipio, :departamento, :direccion, :latitud, :longitud, :telefono, to_date(:fecha,'DD/MM/YYYY'), :nombre_producto, :categoria, :precio, :edad)";
+        //sql ejecucion
+        await BD.Open(sql, [correo, contrasena, nombre_hijo, nombre_padre, nickname, municipio, departamento, direccion, latitud, longitud, telefono, fecha, nombre_producto, categoria, precio, edad], true);
     }
 
     // console.log(json);
 
     // csvToJson.generateJsonFileFromCsv(json, fileOutputName);
+
+    res.status(200).json({
+        "nombre": "exito"
+    })
+
+    console.log("archivo cargado ")
+});
+
+
+router.post('/CargaMasiva', async (req, res) => {
+
+    for (let i = 0; i < json.length; i++) {
+        // console.log(json[i].CorreoElectronico);
+        //instruccion sql
+        var correo=json[i].CorreoElectronico;
+        var contrasena=json[i].Password; 
+        var nombre_hijo=json[i].NombreHijo; 
+        var nombre_padre=json[i].NombrePadre; 
+        var nickname=json[i].NicknameHijo; 
+        var municipio=json[i].Municipio; 
+        var departamento=json[i].Departamento;
+        var direccion=json[i].DescripcionDireccion; 
+        var latitud=json[i].Latitud;
+        var longitud=json[i].Longitud;
+        var telefono=json[i].NumeroTelefono;
+        var fecha=json[i].FechaCarta;
+        var nombre_producto=json[i].NombreJuguete;
+        var categoria=json[i].CategoriaJuguete;
+        var precio=json[i].PrecioJuguete;
+        var edad=json[i].EdadRecomendada;
+
+        sql = "insert into carga(correo, contrasena, nombre_hijo, nombre_padre, nickname, municipio, departamento, direccion, latitud, longitud, telefono, fecha, nombre_producto, categoria, precio, edad) values (:correo, :contrasena, :nombre_hijo, :nombre_padre, :nickname, :municipio, :departamento, :direccion, :latitud, :longitud, :telefono, to_date(:fecha,'DD/MM/YYYY'), :nombre_producto, :categoria, :precio, :edad)";
+        //sql ejecucion
+        await BD.Open(sql, [correo, contrasena, nombre_hijo, nombre_padre, nickname, municipio, departamento, direccion, latitud, longitud, telefono, fecha, nombre_producto, categoria, precio, edad], true);
+    }
 
     res.status(200).json({
         "nombre": "exito"
